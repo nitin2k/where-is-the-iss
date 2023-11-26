@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="leaflet.css"/>
+    <script src="leaflet.js"></script>
+    <style>
+        #issMap{
+            height: 400px;
+            width: 600px;
+        }
+    </style>
+    <title>ISS location</title>
+</head>
+<body>
+    <h1>Where is the ISS?</h1>
+    <p>Longitude:<span id="longData"></span><br/>Latitude:<span id="latData"></span></p>
+    <div id="issMap"></div>
+    <script>
+        const map=L.map('issMap').setView([0,0],1);
+        const tileURL='https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+        const attribution='&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+        const tiles=L.tileLayer(tileURL,{attribution});
+        tiles.addTo(map);
+        const markerIcon=L.icon({
+            iconUrl:'marker.png',
+            iconSize:[60,40],
+            iconAnchor:[30,20]
+        })
+        const marker=L.marker([0,0],{icon: markerIcon}).addTo(map);
+        const longData=document.getElementById('longData');
+        const latData=document.getElementById('latData');
+        const api_url="https://api.wheretheiss.at/v1/satellites/25544"
+        async function getISS(){
+            const response=await fetch(api_url);
+            const data=await response.json();
+            const {longitude,latitude}=data;
+            map.setView([latitude,longitude],5);
+            marker.setLatLng([latitude,longitude]);
+            longData.textContent=longitude.toFixed(2)+'°';
+            latData.textContent=latitude.toFixed(2)+'°';
+        }
+        getISS();
+        setInterval(getISS,1000);
+    </script>
+</body>
+</html>
